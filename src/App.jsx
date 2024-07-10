@@ -1,9 +1,10 @@
+import Phone from "./components/Phone"
 
 
 function App() {
   return (
     <>
-    App
+     <Phone/>
     </>
   )
 }
