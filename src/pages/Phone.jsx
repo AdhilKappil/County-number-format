@@ -2,14 +2,19 @@ import React, { useEffect, useRef, useState } from "react";
 import { contryCodeObj } from "../data/countries";
 import { useNavigate } from "react-router-dom";
 import { usePhoneContext } from "../context/Context";
+import { IoMdArrowDropdown } from "react-icons/io";
+
 
 function Phone() {
   const phoneInputRef = useRef(null);
   const [iti, setIti] = useState(null);
   const navigate = useNavigate();
   const { phoneData, setPhoneData } = usePhoneContext();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-   // Initialize intl-tel-input
+  // Initialize intl-tel-input with using the CDN
   useEffect(() => {
     if (phoneInputRef.current) {
       const phoneInput = intlTelInput(phoneInputRef.current, {
@@ -24,72 +29,98 @@ function Phone() {
     }
   }, []);
 
-  // Update country when phoneData.countryCode changes
+  // Update country when the countryCode changes
   useEffect(() => {
     if (iti) {
       iti.setCountry(phoneData.countryCode);
     }
   }, [phoneData.countryCode, iti]);
 
-  // Update phone number when phoneData.phoneNumber changes
+  // Update phone number when the phoneNumber changes
   useEffect(() => {
     if (iti && phoneData.phoneNumber) {
       iti.setNumber(phoneData.phoneNumber);
     }
   }, [iti, phoneData.phoneNumber]);
 
-  // Handle country selection change
-  const handleCountryChange = (e) => {
-    setPhoneData((prev) => ({ ...prev, countryCode: e.target.value }));
+  // Handle country selection change and adding the values to context 
+  const handleCountryChange = (code, name) => {
+    setPhoneData((prev) => ({ ...prev, countryCode: code, countryName: name, phoneNumber:'' }));
+    setErrorMessage("");
+    setIsDropdownOpen(false);
   };
 
-   // Handle phone number input change
+  // Handle phone number input change 
   const handlePhoneChange = (e) => {
     setPhoneData((prev) => ({ ...prev, phoneNumber: e.target.value }));
+    setErrorMessage("");
   };
 
-  // Handle form submission
-  const handle = () => {
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Here filtering the coustom country based on search
+  const filteredCountries = contryCodeObj.filter((country) =>
+    country.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Handle form submission and render the view details page
+  const handleSubmit = () => {
     if (iti && iti.isValidNumber()) {
       const fullNumber = iti.getNumber();
-      const countryName =
-        contryCodeObj.find((country) => country.code === phoneData.countryCode)
-          ?.name || "";
       setPhoneData((prev) => ({
         ...prev,
         phoneNumber: fullNumber,
-        countryName,
       }));
       navigate("/viewDetails");
     } else {
-      alert("Please enter a valid phone number");
+      setErrorMessage("Please enter a valid phone number");
     }
   };
 
   return (
     <div className="flex justify-center items-center h-svh">
-      <div className="">
-         {/* Country selection dropdown */}
-        <div className="relative flex overflow-hidden rounded-md border-2 transition">
-          <select
-            id="district"
-            className="w-full p-3"
-            value={phoneData.countryCode}
-            onChange={handleCountryChange}
+      <div className="w-80">
+        {/* Searchable Country Dropdown */}
+        <div className="relative">
+          <div
+            className="border p-3 rounded cursor-pointer"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
-            <option value="">Select</option>
-            {contryCodeObj.map((country, index) => (
-              <option key={index} value={country.code}>
-                {country.name}
-              </option>
-            ))}
-          </select>
+            {phoneData.countryName || "Select Country"}
+          </div>
+          <div className="absolute right-2 top-4"><IoMdArrowDropdown size={20}/></div>
+          {isDropdownOpen && (
+            <div className="absolute z-10 w-full mt-1 bg-white border rounded shadow-lg">
+              <input
+                type="text"
+                placeholder="Search country"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="w-full p-2 border-b"
+              />
+              <div className="max-h-60 overflow-y-auto">
+                {filteredCountries.map((country) => (
+                  <div
+                    key={country.code}
+                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleCountryChange(country.code, country.name)}
+                  >
+                    {country.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-         {/* Phone number input */}
+        
+        {/* Phone number input */}
         <div className="flex border-2 items-center p-3 mt-5">
-          <label htmlFor="phone">Phone</label>
+          <label htmlFor="phone" className="mr-2">Phone</label>
           <input
-            className="outline-none"
+            className="outline-none flex-grow"
             type="tel"
             id="phone"
             ref={phoneInputRef}
@@ -97,8 +128,11 @@ function Phone() {
             value={phoneData.phoneNumber}
           />
         </div>
+        {errorMessage && (
+          <div className="text-red-500 text-sm mt-1">{errorMessage}</div>
+        )}
         <div className="flex justify-center">
-          <button onClick={handle} className="mt-5 p-3 border-2 w-36">
+          <button onClick={handleSubmit} className="mt-5 p-3 border-2 w-full">
             Next
           </button>
         </div>

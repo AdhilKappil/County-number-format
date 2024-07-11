@@ -6,7 +6,7 @@ export const PhoneProvider = ({ children }) => {
   const [phoneData, setPhoneData] = useState({
     countryCode: 'IN',
     phoneNumber: '',
-    countryName: ''
+    countryName: 'India'
   });
 
   return (
