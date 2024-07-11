@@ -1,8 +1,29 @@
-# React + Vite
+# Country and Phone Number Input Form
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![MIT License](3.gif)
+## Description
+This project is a React application that provides a form with country and phone number input fields. The form allows users to select a country from a dropdown list and displays the corresponding dialing code. The phone number input field formats the number as it is typed
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Technologies Used:
+
+- Frontend: React, JavaScript, Tailwind CSS
+- Library: intl-tel-input CDN
+
+## Features
+
+## Authentication:
+- Country Dropdown: A dropdown menu with a list of all countries.
+- Phone Number Input: Two fields - dialing code (dropdown) and phone number (text input).
+- Default Values: Initially sets the country to India and the dialing code to +91.
+- Dynamic Dialing Code: Changing the country updates the dialing code.
+- Phone Number Formatting: Formats the phone number based on the dialing code.
+- Navigation: A "Next" button to show the entered information on the second page, and a "Back" button to return to the first page with saved states
+
+
+## Installation
+1. Clone the repository: `git clone <repository-url>`
+2. Navigate to the project directory: `cd <destination>`
+3. Install dependencies: `npm install ` / `npm install nodemon -g`
+4. Start the server: `npm run dev`
+
