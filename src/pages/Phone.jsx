@@ -19,7 +19,6 @@ function Phone() {
     if (phoneInputRef.current) {
       const phoneInput = window.intlTelInput(phoneInputRef.current, {
         initialCountry: phoneData.countryCode,
-       
         utilsScript:
           "https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.0/build/js/utils.js",
       });
