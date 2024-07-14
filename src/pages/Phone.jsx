@@ -11,52 +11,54 @@ function Phone() {
 
   useEffect(() => {
     if (!phoneData.countryName) {
-      const defaultCountry = countryCodeObj.find(c => c.name === "India");
+      const defaultCountry = countryCodeObj.find((c) => c.name === "India");
       setPhoneData({
         countryCode: defaultCountry.dialCode,
-        phoneNumber: '',
-        countryName: defaultCountry.name
+        phoneNumber: "",
+        countryName: defaultCountry.name,
       });
     }
   }, []);
 
   const handleCountrySelect = (country) => {
-    setPhoneData(prevData => ({
+    setPhoneData((prevData) => ({
       ...prevData,
       countryCode: country.dialCode,
       countryName: country.name,
-      phoneNumber: ''
+      phoneNumber: "",
     }));
     setError("");
   };
 
   const handleDialCodeSelect = (country) => {
-    setPhoneData(prevData => ({
+    setPhoneData((prevData) => ({
       ...prevData,
       countryCode: country.dialCode,
-      phoneNumber: ''
+      phoneNumber: "",
     }));
     setError("");
   };
 
   const handlePhoneNumberChange = (e) => {
     const input = e.target.value;
-    setPhoneData(prevData => ({
+    setPhoneData((prevData) => ({
       ...prevData,
-      phoneNumber: input
+      phoneNumber: input,
     }));
     validatePhoneNumber(input);
   };
 
   const validatePhoneNumber = (input) => {
-    const country = countryCodeObj.find(c => c.dialCode === phoneData.countryCode);
+    const country = countryCodeObj.find(
+      (c) => c.dialCode === phoneData.countryCode
+    );
     if (!country) {
       setError("Invalid country code");
       return;
     }
 
-    const sampleNumberDigits = country.sampleNumber.replace(/\D/g, '');
-    const inputDigits = input.replace(/\D/g, '');
+    const sampleNumberDigits = country.sampleNumber.replace(/\D/g, "");
+    const inputDigits = input.replace(/\D/g, "");
 
     if (inputDigits.length !== sampleNumberDigits.length) {
       setError(`Please enter a valid ${country.name} phone number`);
@@ -66,16 +68,21 @@ function Phone() {
   };
 
   const getPlaceholder = () => {
-    const country = countryCodeObj.find(c => c.dialCode === phoneData.countryCode);
+    const country = countryCodeObj.find(
+      (c) => c.dialCode === phoneData.countryCode
+    );
     return country ? country.sampleNumber : "";
   };
 
   const handleNextClick = () => {
     if (error) {
       alert("Please enter a valid phone number before proceeding.");
-    } else {
+
+    } else if(!phoneData.phoneNumber){
+      setError(`Please enter a valid phone number`);
+    }else{
       navigate("/viewDetails");
-    }
+    } 
   };
 
   return (
@@ -84,7 +91,9 @@ function Phone() {
         <div className="flex flex-col pt-4">
           <CustomDropdown
             options={countryCodeObj}
-            selectedValue={countryCodeObj.find(c => c.name === phoneData.countryName)}
+            selectedValue={countryCodeObj.find(
+              (c) => c.name === phoneData.countryName
+            )}
             onSelect={handleCountrySelect}
             displayKey="name"
             placeholder="Select Country"
@@ -95,7 +104,9 @@ function Phone() {
           <div className="flex-1">
             <CustomDropdown
               options={countryCodeObj}
-              selectedValue={countryCodeObj.find(c => c.dialCode === phoneData.countryCode)}
+              selectedValue={countryCodeObj.find(
+                (c) => c.dialCode === phoneData.countryCode
+              )}
               onSelect={handleDialCodeSelect}
               displayKey="dialCode"
               valueKey="name"
@@ -104,14 +115,13 @@ function Phone() {
             />
           </div>
           <div className="rounded border-2 w-3/5 p-3">
-  <input
-    className="w-full border-gray-300 bg-white focus:outline-none focus:ring-0"
-    placeholder={getPlaceholder()}
-    value={phoneData.phoneNumber}
-    onChange={handlePhoneNumberChange}
-  />
-</div>
-
+            <input
+              className="w-full border-gray-300 bg-white focus:outline-none focus:ring-0"
+              placeholder={getPlaceholder()}
+              value={phoneData.phoneNumber}
+              onChange={handlePhoneNumberChange}
+            />
+          </div>
         </div>
         {error && <div className="text-red-500 text-sm mb-3">{error}</div>}
         <div className="flex justify-center">
