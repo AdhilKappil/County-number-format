@@ -7,8 +7,9 @@ This project is a React application that provides a form with country and phone 
 
 ## Technologies Used:
 
-- Frontend: React, JavaScript, Tailwind CSS
-- Library: intl-tel-input CDN
+- React
+- JavaScript
+- Tailwind CSS
 
 ## Features
 
