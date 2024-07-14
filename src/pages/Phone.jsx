@@ -6,10 +6,13 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 function Phone() {
+
+ // Get phoneData and setPhoneData from context
   const { phoneData, setPhoneData } = usePhoneContext();
   const navigate = useNavigate();
   const [error, setError] = useState("");
 
+  // Set default country to India if no country is selected
   useEffect(() => {
     if (!phoneData.countryName) {
       const defaultCountry = countryCodeObj.find((c) => c.name === "India");
@@ -21,6 +24,7 @@ function Phone() {
     }
   }, []);
 
+  // Handling coutry select and Update phoneData with selected country details
   const handleCountrySelect = (country) => {
     setPhoneData((prevData) => ({
       ...prevData,
@@ -31,6 +35,7 @@ function Phone() {
     setError("");
   };
 
+    // Update phoneData with selected dial code
   const handleDialCodeSelect = (country) => {
     setPhoneData((prevData) => ({
       ...prevData,
@@ -40,6 +45,7 @@ function Phone() {
     setError("");
   };
 
+   // Update phone number and validate it
   const handlePhoneNumberChange = (e) => {
     const input = e.target.value;
     setPhoneData((prevData) => ({
@@ -49,6 +55,7 @@ function Phone() {
     validatePhoneNumber(input);
   };
 
+  // Validate the phone number based on the selected country sample number
   const validatePhoneNumber = (input) => {
     const country = countryCodeObj.find(
       (c) => c.dialCode === phoneData.countryCode
@@ -68,6 +75,7 @@ function Phone() {
     }
   };
 
+  // Get placeholder based on selected country sample number
   const getPlaceholder = () => {
     const country = countryCodeObj.find(
       (c) => c.dialCode === phoneData.countryCode
@@ -75,6 +83,7 @@ function Phone() {
     return country ? country.sampleNumber : "";
   };
 
+  // Navigate to next page if there is no error and phone number is entered
   const handleNextClick = () => {
     if (error) {
       toast.error("Please enter a valid phone number before proceeding.")

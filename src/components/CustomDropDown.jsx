@@ -14,11 +14,13 @@ const CustomDropdown = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Filter options based on search term
   const filteredOptions = options.filter((option) =>
     option[displayKey].toLowerCase().includes(searchTerm.toLowerCase()) ||
     (showCountryName && option.name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+   // Handle option selection
   const handleSelect = (option) => {
     onSelect(option);
     setIsOpen(false);

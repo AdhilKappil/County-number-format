@@ -3,6 +3,7 @@ import { usePhoneContext } from "../context/Context";
 
 function ViewDetails() {
   const navigate = useNavigate();
+  // Get phoneData from context
   const { phoneData } = usePhoneContext();
 
   return (
