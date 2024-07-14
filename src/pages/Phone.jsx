@@ -3,6 +3,7 @@ import { countryCodeObj } from "../data/countries";
 import CustomDropdown from "../components/CustomDropDown";
 import { usePhoneContext } from "../context/Context";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function Phone() {
   const { phoneData, setPhoneData } = usePhoneContext();
@@ -76,7 +77,7 @@ function Phone() {
 
   const handleNextClick = () => {
     if (error) {
-      alert("Please enter a valid phone number before proceeding.");
+      toast.error("Please enter a valid phone number before proceeding.")
 
     } else if(!phoneData.phoneNumber){
       setError(`Please enter a valid phone number`);
