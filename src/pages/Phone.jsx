@@ -1,160 +1,121 @@
-import React, { useEffect, useRef, useState } from "react";
-import { contryCodeObj } from "../data/countries";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { countryCodeObj } from "../data/countries";
+import CustomDropdown from "../components/CustomDropDown";
 import { usePhoneContext } from "../context/Context";
-import { IoMdArrowDropdown } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
 
 function Phone() {
-  const phoneInputRef = useRef(null);
-  const [iti, setIti] = useState(null);
-  const navigate = useNavigate();
   const { phoneData, setPhoneData } = usePhoneContext();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [dialCode, setDialCode] = useState("");
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
 
-  // Initialize intl-tel-input with using the CDN
   useEffect(() => {
-    if (phoneInputRef.current) {
-      const phoneInput = window.intlTelInput(phoneInputRef.current, {
-        initialCountry: phoneData.countryCode,
-       
-        utilsScript:
-          "https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.0/build/js/utils.js",
+    if (!phoneData.countryName) {
+      const defaultCountry = countryCodeObj.find(c => c.name === "India");
+      setPhoneData({
+        countryCode: defaultCountry.dialCode,
+        phoneNumber: '',
+        countryName: defaultCountry.name
       });
-      setIti(phoneInput);
-
-      // Set initial dial code
-      setDialCode(phoneInput.getSelectedCountryData().dialCode);
-
-      return () => {
-        phoneInput.destroy();
-      };
     }
   }, []);
 
-  // Update country when the countryCode changes
-  useEffect(() => {
-    if (iti) {
-      iti.setCountry(phoneData.countryCode);
-      setDialCode(iti.getSelectedCountryData().dialCode);
-    }
-  }, [phoneData.countryCode, iti]);
-
-  // Update phone number when the phoneNumber changes
-  useEffect(() => {
-    if (iti && phoneData.phoneNumber) {
-      iti.setNumber(phoneData.phoneNumber);
-    }
-  }, [iti, phoneData.phoneNumber]);
-
-  // Handle country selection change and adding the values to context
-  const handleCountryChange = (code, name) => {
-    setPhoneData((prev) => ({
-      ...prev,
-      countryCode: code,
-      countryName: name,
-      phoneNumber: "",
+  const handleCountrySelect = (country) => {
+    setPhoneData(prevData => ({
+      ...prevData,
+      countryCode: country.dialCode,
+      countryName: country.name,
+      phoneNumber: ''
     }));
-    setErrorMessage("");
-    setIsDropdownOpen(false);
-    
-    if (iti) {
-      iti.setCountry(code);
-      setDialCode(iti.getSelectedCountryData().dialCode);
+    setError("");
+  };
+
+  const handleDialCodeSelect = (country) => {
+    setPhoneData(prevData => ({
+      ...prevData,
+      countryCode: country.dialCode,
+      phoneNumber: ''
+    }));
+    setError("");
+  };
+
+  const handlePhoneNumberChange = (e) => {
+    const input = e.target.value;
+    setPhoneData(prevData => ({
+      ...prevData,
+      phoneNumber: input
+    }));
+    validatePhoneNumber(input);
+  };
+
+  const validatePhoneNumber = (input) => {
+    const country = countryCodeObj.find(c => c.dialCode === phoneData.countryCode);
+    if (!country) {
+      setError("Invalid country code");
+      return;
+    }
+
+    const sampleNumberDigits = country.sampleNumber.replace(/\D/g, '');
+    const inputDigits = input.replace(/\D/g, '');
+
+    if (inputDigits.length !== sampleNumberDigits.length) {
+      setError(`Please enter a valid ${country.name} phone number`);
+    } else {
+      setError("");
     }
   };
 
-  // Handle phone number input change
-  const handlePhoneChange = (e) => {
-    setPhoneData((prev) => ({ ...prev, phoneNumber: e.target.value }));
-    setErrorMessage("");
+  const getPlaceholder = () => {
+    const country = countryCodeObj.find(c => c.dialCode === phoneData.countryCode);
+    return country ? country.sampleNumber : "";
   };
 
-  // Handle search input change
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
-
-  // Here filtering the custom country based on search
-  const filteredCountries = contryCodeObj.filter((country) =>
-    country.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Handle form submission and render the view details page
-  const handleSubmit = () => {
-    if (iti && iti.isValidNumber()) {
-      const fullNumber = iti.getNumber();
-      setPhoneData((prev) => ({
-        ...prev,
-        phoneNumber: fullNumber,
-      }));
-      navigate("/viewDetails");
+  const handleNextClick = () => {
+    if (error) {
+      alert("Please enter a valid phone number before proceeding.");
     } else {
-      setErrorMessage("Please enter a valid phone number");
+      navigate("/viewDetails");
     }
   };
 
   return (
-    <div className="flex justify-center items-center h-svh">
-      <div className="w-80">
-        {/* Searchable Country Dropdown */}
-        <div className="relative">
-          <div
-            className="border p-3 rounded cursor-pointer"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          >
-            {phoneData.countryName || "Select Country"}
-          </div>
-          <div className="absolute right-2 top-4">
-            <IoMdArrowDropdown size={20} />
-          </div>
-          {isDropdownOpen && (
-            <div className="absolute z-10 w-full mt-1 bg-white border rounded shadow-lg">
-              <input
-                type="text"
-                placeholder="Search country"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="w-full p-2 border-b"
-              />
-              <div className="max-h-60 overflow-y-auto">
-                {filteredCountries.map((country) => (
-                  <div
-                    key={country.code}
-                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() =>
-                      handleCountryChange(country.code, country.name)
-                    }
-                  >
-                    {country.name}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Phone number input */}
-        <div className="flex border-2 items-center p-3 mt-5">
-          <label htmlFor="phone" className="mr-2">
-            +{dialCode}
-          </label>
-          <input
-            className="outline-none flex-grow"
-            type="tel"
-            id="phone"
-            ref={phoneInputRef}
-            onChange={handlePhoneChange}
-            value={phoneData.phoneNumber}
+    <div className="flex justify-center items-center h-screen">
+      <div className="w-full p-5 md:w-3/4 lg:w-2/5">
+        <div className="flex flex-col pt-4">
+          <CustomDropdown
+            options={countryCodeObj}
+            selectedValue={countryCodeObj.find(c => c.name === phoneData.countryName)}
+            onSelect={handleCountrySelect}
+            displayKey="name"
+            placeholder="Select Country"
+            showOnlyDisplayKey={true}
           />
         </div>
-        {errorMessage && (
-          <div className="text-red-500 text-sm mt-1">{errorMessage}</div>
-        )}
+        <div className="flex gap-5 my-5">
+          <div className="flex-1">
+            <CustomDropdown
+              options={countryCodeObj}
+              selectedValue={countryCodeObj.find(c => c.dialCode === phoneData.countryCode)}
+              onSelect={handleDialCodeSelect}
+              displayKey="dialCode"
+              valueKey="name"
+              placeholder="Dial Code"
+              showCountryName={true}
+            />
+          </div>
+          <div className="rounded border-2 w-3/5 p-3">
+  <input
+    className="w-full border-gray-300 bg-white focus:outline-none focus:ring-0"
+    placeholder={getPlaceholder()}
+    value={phoneData.phoneNumber}
+    onChange={handlePhoneNumberChange}
+  />
+</div>
+
+        </div>
+        {error && <div className="text-red-500 text-sm mb-3">{error}</div>}
         <div className="flex justify-center">
-          <button onClick={handleSubmit} className="mt-5 p-3 border-2 w-full">
+          <button className="border-2 w-full p-3" onClick={handleNextClick}>
             Next
           </button>
         </div>

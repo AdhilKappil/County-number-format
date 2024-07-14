@@ -4,7 +4,7 @@ const PhoneContext = createContext();
 
 export const PhoneProvider = ({ children }) => {
   const [phoneData, setPhoneData] = useState({
-    countryCode: 'IN',
+    countryCode: '+91',
     phoneNumber: '',
     countryName: 'India'
   });
